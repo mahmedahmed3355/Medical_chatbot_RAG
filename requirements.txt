@@ -1,0 +1,22 @@
+langchain
+langchain_community
+langchain_huggingface
+faiss-cpu
+pypdf
+huggingface_hub
+flask
+python-dotenv
+fastapi
+uvicorn
+jinja2
+python-dotenv
+requests
+sentence-transformers
+huggingface_hub
+transformers
+torch
+pydantic
+itsdangerous     # مطلوبة للـ SessionMiddleware
+langchain_groq
+
+

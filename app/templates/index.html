@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🔍 AI Medical Chatbot</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      margin: 2rem;
+      background: #f4f4f4;
+    }
+
+    .chat-container {
+      max-width: 720px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #007bff;
+    }
+
+    .message {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      border-radius: 10px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .user {
+      background-color: #d1e7ff;
+      text-align: right;
+    }
+
+    .assistant {
+      background-color: #e9ecef;
+      text-align: left;
+    }
+
+    textarea {
+      width: 100%;
+      height: 4rem;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 6px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .clear-btn {
+      background-color: #6c757d;
+      margin-left: 10px;
+    }
+
+    .clear-btn:hover {
+      background-color: #5a6268;
+    }
+
+    #loading {
+      text-align: center;
+      display: none;
+      color: gray;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h1>🔍 AI Medical Chatbot</h1>
+
+    <div id="chat-box">
+      {% for msg in messages %}
+        <div class="message {{ msg.role }}">
+          <strong>{{ "You" if msg.role == "user" else "Assistant" }}:</strong><br />
+          {{ msg.content | safe }}
+        </div>
+      {% endfor %}
+    </div>
+
+    <form method="post" action="/">
+      <textarea name="prompt" id="prompt" placeholder="Ask a medical question..." required></textarea>
+      <br />
+      <button type="submit">Send</button>
+    </form>
+
+    <form method="get" action="/clear">
+      <button type="submit" class="clear-btn">Clear Chat</button>
+    </form>
+
+    <div id="loading">⏳ Thinking... Please wait.</div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const loading = document.getElementById("loading");
+
+    // Show loader while submitting
+    const form = document.querySelector("form");
+    form.addEventListener("submit", () => {
+      loading.style.display = "block";
+    });
+
+    // Optional: Speak the assistant’s latest message
+    const messages = document.querySelectorAll(".assistant");
+    if (messages.length) {
+      const lastMsg = messages[messages.length - 1].textContent.trim();
+      const utterance = new SpeechSynthesisUtterance(lastMsg);
+      utterance.lang = "en-US"; // For Arabic: "ar-EG"
+      window.speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>
