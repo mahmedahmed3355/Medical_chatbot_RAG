@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from app.components.retriever import create_qa_chain
 from dotenv import load_dotenv
@@ -11,30 +12,32 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI()
-# لو هتتعامل مع React أو صفحة تانية
+
+# Allow frontend (React/HTML/JS) to access backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # أو ["http://localhost:3000"]
+    allow_origins=["*"],  # adjust if you know frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Session middleware for storing chat messages
-app.add_middleware(SessionMiddleware, secret_key=os.urandom(24))
+SESSION_SECRET = os.getenv("SESSION_SECRET", "supersecretkey")
+app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
 
 # Static files and templates
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
-# Home route - renders index.html
+# Home route
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
     messages = request.session.get("messages", [])
     return templates.TemplateResponse("index.html", {"request": request, "messages": messages})
 
-
-# POST route from form submission (index.html)
+# Handle form POST
 @app.post("/", response_class=HTMLResponse)
 async def post_index(request: Request, prompt: str = Form(...)):
     messages = request.session.get("messages", [])
@@ -57,8 +60,7 @@ async def post_index(request: Request, prompt: str = Form(...)):
     request.session["messages"] = messages
     return RedirectResponse(url="/", status_code=303)
 
-
-# API route for JS-based chat in index.html (Fetch API)
+# API route for JS fetch
 @app.post("/api/chat")
 async def api_chat(request: Request):
     data = await request.json()
@@ -78,7 +80,6 @@ async def api_chat(request: Request):
 
     request.session["messages"] = messages
     return JSONResponse({"response": result})
-
 
 # Clear chat history
 @app.get("/clear")
