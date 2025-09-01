@@ -29,6 +29,7 @@ This project is an AI-powered **Medical Chatbot** built using **Retrieval-Augmen
 ## 🏗️ Project Structure
 
 
+```Bash
 
 Medical_chatbot_RAG/
 │
