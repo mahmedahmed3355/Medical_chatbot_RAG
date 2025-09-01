@@ -9,6 +9,7 @@ This project is an AI-powered **Medical Chatbot** built using **Retrieval-Augmen
 - ✅ GROQ for accelerated model inference  
 - ✅ Frontend with HTML/CSS + JavaScript  
 - ✅ Optional voice reply using `SpeechSynthesis` API
+- ✅ In Advanced Version we using SFT&RLHF for training LLM model we using with Rag to enhancing the result 
 
 > 💬 Ask medical questions in natural language, and get intelligent, contextual answers powered by LLMs and document search!
 
