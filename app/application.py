@@ -1,88 +1,54 @@
-import os
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
+from flask import Flask,render_template,request,session,redirect,url_for
 from app.components.retriever import create_qa_chain
 from dotenv import load_dotenv
+import os
 
-# Load environment variables
 load_dotenv()
+HF_TOKEN = os.environ.get("HF_TOKEN")
 
-app = FastAPI()
+app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
-# Allow frontend (React/HTML/JS) to access backend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # adjust if you know frontend domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from markupsafe import Markup
+def nl2br(value):
+    return Markup(value.replace("\n" , "<br>\n"))
 
-# Session middleware for storing chat messages
-SESSION_SECRET = os.getenv("SESSION_SECRET", "supersecretkey")
-app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
+app.jinja_env.filters['nl2br'] = nl2br
 
-# Static files and templates
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+@app.route("/" , methods=["GET","POST"])
+def index():
+    if "messages" not in session:
+        session["messages"]=[]
 
-# Home route
-@app.get("/", response_class=HTMLResponse)
-async def get_index(request: Request):
-    messages = request.session.get("messages", [])
-    return templates.TemplateResponse("index.html", {"request": request, "messages": messages})
+    if request.method=="POST":
+        user_input = request.form.get("prompt")
 
-# Handle form POST
-@app.post("/", response_class=HTMLResponse)
-async def post_index(request: Request, prompt: str = Form(...)):
-    messages = request.session.get("messages", [])
-    messages.append({"role": "user", "content": prompt})
+        if user_input:
+            messages = session["messages"]
+            messages.append({"role" : "user" , "content":user_input})
+            session["messages"] = messages
 
-    try:
-        qa_chain = create_qa_chain()
-        if qa_chain is None:
-            raise Exception("QA chain could not be created (LLM or VectorStore issue)")
-        response = qa_chain.invoke({"query": prompt})
-        result = response.get("result", "No response")
-        messages.append({"role": "assistant", "content": result})
-    except Exception as e:
-        return templates.TemplateResponse("index.html", {
-            "request": request,
-            "messages": messages,
-            "error": f"Error: {str(e)}"
-        })
+            try:
+                qa_chain = create_qa_chain()
+                response = qa_chain.invoke({"query" : user_input})
+                result = response.get("result" , "No response")
 
-    request.session["messages"] = messages
-    return RedirectResponse(url="/", status_code=303)
+                messages.append({"role" : "assistant" , "content" : result})
+                session["messages"] = messages
 
-# API route for JS fetch
-@app.post("/api/chat")
-async def api_chat(request: Request):
-    data = await request.json()
-    prompt = data.get("prompt", "")
-    messages = request.session.get("messages", [])
-    messages.append({"role": "user", "content": prompt})
+            except Exception as e:
+                error_msg = f"Error : {str(e)}"
+                return render_template("index.html" , messages = session["messages"] , error = error_msg)
+            
+        return redirect(url_for("index"))
+    return render_template("index.html" , messages=session.get("messages" , []))
 
-    try:
-        qa_chain = create_qa_chain()
-        if qa_chain is None:
-            raise Exception("QA chain could not be created (LLM or VectorStore issue)")
-        response = qa_chain.invoke({"query": prompt})
-        result = response.get("result", "No response")
-        messages.append({"role": "assistant", "content": result})
-    except Exception as e:
-        result = f"⚠️ Error: {str(e)}"
+@app.route("/clear")
+def clear():
+    session.pop("messages" , None)
+    return redirect(url_for("index"))
 
-    request.session["messages"] = messages
-    return JSONResponse({"response": result})
+if __name__=="__main__":
+    app.run(host="0.0.0.0" , port=5000 , debug=False , use_reloader = False)
 
-# Clear chat history
-@app.get("/clear")
-async def clear_chat(request: Request):
-    request.session.pop("messages", None)
-    return RedirectResponse(url="/", status_code=303)
+
