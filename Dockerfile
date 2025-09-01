@@ -1,27 +1,28 @@
-# Parent image
+## Parent image
 FROM python:3.10-slim
 
-# Environment variables
+## Essential environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Set workdir
+## Work directory inside the docker container
 WORKDIR /app
 
-# Install system dependencies
+## Installing system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
+## Copying all contents from local to container
 COPY . .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+## Install Python dependencies
+RUN pip install --no-cache-dir -e .
 
-# Expose FastAPI default port
-EXPOSE 7860
+## Expose only flask port
+EXPOSE 5000
 
-# Run FastAPI app with uvicorn
-CMD ["uvicorn", "app.application:app", "--host", "0.0.0.0", "--port", "7860"]
+## Run the Flask app
+CMD ["python", "app/application.py"]
+
