@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: medical-rag-config
+  namespace: medical-rag
+data:
+  PORT: "5000"

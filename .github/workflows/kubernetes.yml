@@ -1,0 +1,38 @@
+name: Kubernetes
+
+on:
+  push:
+    branches:
+      - main
+      - taskuon-improvements
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate Kubernetes Manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Build Kustomize manifests
+        run: kubectl kustomize k8s > /tmp/medical-rag-rendered.yaml
+
+      - name: Validate rendered manifests
+        run: |
+          test -s /tmp/medical-rag-rendered.yaml
+          grep -q '^kind: Deployment' /tmp/medical-rag-rendered.yaml
+          grep -q '^kind: Service' /tmp/medical-rag-rendered.yaml
+          grep -q '^kind: NetworkPolicy' /tmp/medical-rag-rendered.yaml
+          grep -q '^kind: ResourceQuota' /tmp/medical-rag-rendered.yaml
+          grep -q '^kind: LimitRange' /tmp/medical-rag-rendered.yaml
+          grep -q '^kind: PodDisruptionBudget' /tmp/medical-rag-rendered.yaml
