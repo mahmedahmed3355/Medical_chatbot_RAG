@@ -1,60 +1,117 @@
 pipeline {
     agent any
 
+    options {
+        timestamps()
+        ansiColor('xterm')
+    }
+
     environment {
-        AWS_REGION = 'us-east-1'
-        ECR_REPO = 'my-repo'
-        IMAGE_TAG = 'latest'
-        SERVICE_NAME = 'llmops-medical-service'
+        AWS_REGION = credentials('aws-region')
+        ECR_REPO = 'medical-rag-chatbot'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        SERVICE_NAME = 'medical-rag-chatbot'
     }
 
     stages {
-        stage('Clone GitHub Repo') {
+        stage('Checkout') {
             steps {
-                script {
-                    echo 'Cloning GitHub repo to Jenkins...'
-                    checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'github-token', url: 'https://github.com/data-guru0/RAG-MEDICAL-CHATBOT.git']])
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh '''
+                    python -m pip install --upgrade pip
+                    python -m pip install -r requirements.txt
+                    python -m pip install -r requirements-dev.txt
+                '''
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                sh 'python -m ruff check app tests'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'python -m pytest -q'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh '''
+                    docker build \
+                        --tag ${ECR_REPO}:${IMAGE_TAG} \
+                        .
+                '''
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                sh '''
+                    trivy image \
+                        --severity HIGH,CRITICAL \
+                        --exit-code 1 \
+                        --format json \
+                        --output trivy-report.json \
+                        ${ECR_REPO}:${IMAGE_TAG}
+                '''
+            }
+
+            post {
+                always {
+                    archiveArtifacts(
+                        artifacts: 'trivy-report.json',
+                        allowEmptyArchive: true
+                    )
                 }
             }
         }
 
-        stage('Build, Scan, and Push Docker Image to ECR') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-token']]) {
-                    script {
-                        def accountId = sh(script: "aws sts get-caller-identity --query Account --output text", returnStdout: true).trim()
-                        def ecrUrl = "${accountId}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO}"
-                        def imageFullTag = "${ecrUrl}:${IMAGE_TAG}"
-
-                        sh """
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ecrUrl}
-                        docker build -t ${env.ECR_REPO}:${IMAGE_TAG} .
-                        trivy image --severity HIGH,CRITICAL --format json -o trivy-report.json ${env.ECR_REPO}:${IMAGE_TAG} || true
-                        docker tag ${env.ECR_REPO}:${IMAGE_TAG} ${imageFullTag}
-                        docker push ${imageFullTag}
-                        """
-
-                        archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
-                    }
+        stage('Push to ECR') {
+            when {
+                expression {
+                    return env.BRANCH_NAME == 'main'
                 }
             }
-        }
 
-         stage('Deploy to AWS App Runner') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-token']]) {
+                withCredentials([
+                    [$class: 'AmazonWebServicesCredentialsBinding',
+                     credentialsId: 'aws-token']
+                ]) {
                     script {
-                        def accountId = sh(script: "aws sts get-caller-identity --query Account --output text", returnStdout: true).trim()
-                        def ecrUrl = "${accountId}.dkr.ecr.${env.AWS_REGION}.amazonaws.com/${env.ECR_REPO}"
-                        def imageFullTag = "${ecrUrl}:${IMAGE_TAG}"
+                        def accountId = sh(
+                            script: '''
+                                aws sts get-caller-identity \
+                                    --query Account \
+                                    --output text
+                            ''',
+                            returnStdout: true
+                        ).trim()
 
-                        echo "Triggering deployment to AWS App Runner..."
+                        def ecrUrl =
+                            "${accountId}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
 
                         sh """
-                        SERVICE_ARN=\$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${SERVICE_NAME}'].ServiceArn" --output text --region ${AWS_REGION})
-                        echo "Found App Runner Service ARN: \$SERVICE_ARN"
+                            aws ecr get-login-password \
+                                --region ${AWS_REGION} \
+                            | docker login \
+                                --username AWS \
+                                --password-stdin ${ecrUrl}
 
-                        aws apprunner start-deployment --service-arn \$SERVICE_ARN --region ${AWS_REGION}
+                            docker tag \
+                                ${ECR_REPO}:${IMAGE_TAG} \
+                                ${ecrUrl}:${IMAGE_TAG}
+
+                            docker push \
+                                ${ecrUrl}:${IMAGE_TAG}
                         """
                     }
                 }
