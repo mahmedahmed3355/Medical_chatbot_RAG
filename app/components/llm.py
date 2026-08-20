@@ -1,14 +1,31 @@
-from langchain_huggingface import HuggingFaceEndpoint
-from app.config.config import HF_TOKEN,HUGGINGFACE_REPO_ID
+from typing import Optional
 
-from app.common.logger import get_logger
+from langchain_huggingface import HuggingFaceEndpoint
+
 from app.common.custom_exception import CustomException
+from app.common.logger import get_logger
+from app.config.config import HF_TOKEN, HUGGINGFACE_REPO_ID
 
 logger = get_logger(__name__)
 
-def load_llm(huggingface_repo_id: str = HUGGINGFACE_REPO_ID , hf_token:str = HF_TOKEN):
+
+def load_llm(
+    huggingface_repo_id: str = HUGGINGFACE_REPO_ID,
+    hf_token: Optional[str] = HF_TOKEN,
+):
     try:
-        logger.info("Loading LLM from HuggingFace")
+        if not huggingface_repo_id:
+            raise ValueError("A Hugging Face repository ID is required")
+
+        if not hf_token:
+            raise ValueError(
+                "HF_TOKEN is required to initialize the Hugging Face endpoint"
+            )
+
+        logger.info(
+            "Loading Hugging Face LLM: %s",
+            huggingface_repo_id,
+        )
 
         llm = HuggingFaceEndpoint(
             repo_id=huggingface_repo_id,
@@ -18,10 +35,16 @@ def load_llm(huggingface_repo_id: str = HUGGINGFACE_REPO_ID , hf_token:str = HF_
             return_full_text=False,
         )
 
-        logger.info("LLM loaded sucesfully...")
+        logger.info("Hugging Face LLM loaded successfully")
 
         return llm
-    
-    except Exception as e:
-        error_message = CustomException("Failed to load a llm" , e)
-        logger.error(str(error_message))
+
+    except CustomException:
+        raise
+
+    except Exception as exc:
+        logger.exception("Failed to load LLM")
+        raise CustomException(
+            "Failed to load LLM",
+            exc,
+        ) from exc

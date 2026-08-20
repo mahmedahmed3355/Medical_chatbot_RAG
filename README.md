@@ -1,48 +1,200 @@
-# 🧠 AI Medical Chatbot – RAG Based (FastAPI + LangChain + HuggingFace + FAISS)
+# Medical RAG Chatbot
 
-This project is an AI-powered **Medical Chatbot** built using **Retrieval-Augmented Generation (RAG)**, combining:
+A medical Retrieval-Augmented Generation (RAG) chatbot built with Flask, LangChain, FAISS, Hugging Face, and Groq.
 
-- ✅ FastAPI for the web backend  
-- ✅ LangChain for LLM chaining and RAG  
-- ✅ FAISS for fast semantic search  
-- ✅ HuggingFace for embeddings and LLM  
-- ✅ GROQ for accelerated model inference  
-- ✅ Frontend with HTML/CSS + JavaScript  
-- ✅ Optional voice reply using `SpeechSynthesis` API
-- ✅ In Advanced Version we using SFT&RLHF for training LLM model we using with Rag to enhancing the result 
+The application processes medical PDF documents, creates embeddings, stores them in a FAISS vector database, retrieves relevant context, and uses an LLM to generate concise answers.
 
-> 💬 Ask medical questions in natural language, and get intelligent, contextual answers powered by LLMs and document search!
+## Features
 
----
+- PDF document loading
+- Text chunking with configurable chunk size and overlap
+- Hugging Face embeddings
+- FAISS vector store
+- Retrieval-Augmented Generation
+- Groq and Hugging Face LLM integration
+- Flask API
+- Health endpoint
+- Docker support
+- Gunicorn production server
+- GitHub Actions CI
+- Ruff linting
+- Pytest test suite
+- Jenkins pipeline configuration
+- Environment-based configuration
 
-## 🚀 Features
+## Architecture
 
-- 🔍 Ask medical questions via a friendly chatbot UI
-- 📄 RAG-enabled: context comes from your own PDF data
-- ⚡ Powered by `mistralai/Mistral-7B-Instruct-v0.3` via HuggingFace or GROQ
-- 🔊 Built-in text-to-speech reply
-- 🧠 FAISS-based local vector store
-- ☁️ Ready for deployment on Vercel or Render
-- 🐳 Docker-ready setup (optional)
+Medical PDF Documents
+        |
+        v
+    PDF Loader
+        |
+        v
+   Text Splitter
+        |
+        v
+    Embeddings
+        |
+        v
+FAISS Vector Store
+        |
+        v
+User Question -> Retriever -> Relevant Context
+        |
+        v
+       LLM
+        |
+        v
+   Final Answer
 
----
+## Project Structure
 
-## 🏗️ Project Structure
-
-
-```Bash
-
-Medical_chatbot_RAG/
-│
+.
 ├── app/
-│ ├── application.py # FastAPI backend app
-│ ├── components/ # Core logic: RAG, embeddings, retriever, etc.
-│ └── templates/
-│ └── index.html # Interactive frontend chatbot UI
-│
-├── data/ # Your own medical PDFs (converted to vector store)
-├── vectorstore/db_faiss/ # FAISS vector index
-├── .env # API keys and config
+│   ├── common/
+│   │   ├── custom_exception.py
+│   │   └── logger.py
+│   ├── components/
+│   │   ├── data_loader.py
+│   │   ├── embeddings.py
+│   │   ├── llm.py
+│   │   ├── pdf_loader.py
+│   │   ├── retriever.py
+│   │   └── vector_store.py
+│   ├── config/
+│   │   └── config.py
+│   └── application.py
+├── tests/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── Dockerfile
+├── Jenkinsfile
 ├── requirements.txt
-├── README.md
-└── ...
+├── requirements-dev.txt
+├── pytest.ini
+├── ruff.toml
+└── setup.py
+
+## Requirements
+
+- Python 3.12+
+- pip
+- Docker (optional)
+
+## Installation
+
+Clone the repository:
+
+git clone https://github.com/mahmedahmed3355/Medical_chatbot_RAG.git
+cd Medical_chatbot_RAG
+
+Create a virtual environment:
+
+python3.12 -m venv .venv
+source .venv/bin/activate
+
+Install dependencies:
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -r requirements-dev.txt
+
+## Environment Variables
+
+Create your local environment file:
+
+cp .env.example .env
+
+Configure the required values in .env.
+
+Never commit secrets, API keys, tokens, or production credentials.
+
+## Running the Application
+
+python app/application.py
+
+The application runs on port 5000.
+
+Health endpoint:
+
+curl http://localhost:5000/health
+
+Expected response:
+
+{"status":"ok"}
+
+## Testing
+
+Run the complete test suite:
+
+python -m pytest -q
+
+## Code Quality
+
+Run Ruff:
+
+python -m ruff check app tests
+
+Compile the application:
+
+python -m compileall -q app tests
+
+Run all quality checks:
+
+python -m ruff check app tests && \
+python -m pytest -q && \
+python -m compileall -q app tests
+
+## Docker
+
+Build the image:
+
+docker build -t medical-rag-chatbot .
+
+Run the container:
+
+docker run -d \
+  --name medical-rag-chatbot \
+  -p 5000:5000 \
+  --env-file .env \
+  medical-rag-chatbot
+
+Check the health endpoint:
+
+curl http://localhost:5000/health
+
+Check container health:
+
+docker inspect \
+  --format='Status={{.State.Status}} Health={{.State.Health.Status}}' \
+  medical-rag-chatbot
+
+The container runs using a non-root user and includes a Docker health check.
+
+## Continuous Integration
+
+GitHub Actions automatically runs on pushes and pull requests.
+
+The CI pipeline performs:
+
+- Dependency installation
+- Ruff linting
+- Pytest execution
+- Python compilation checks
+
+## Jenkins
+
+The repository includes a Jenkins pipeline for container build, security scanning, image publishing, and deployment workflows.
+
+## Security
+
+Please review SECURITY.md for information about reporting security vulnerabilities.
+
+## Contributing
+
+Please review CONTRIBUTING.md before opening an issue or pull request.
+
+## License
+
+This project is currently provided without an explicit license.
