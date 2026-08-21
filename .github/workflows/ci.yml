@@ -43,6 +43,9 @@ jobs:
       - name: Run Ruff
         run: python -m ruff check app tests
 
+      - name: Run mypy
+        run: python -m mypy app
+
       - name: Run tests
         run: python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=80
 
