@@ -22,14 +22,14 @@ def test_index_get_returns_success(client):
     assert response.status_code == 200
 
 
-def test_index_post_empty_prompt_redirects(client):
+def test_index_post_empty_prompt_returns_validation_error(client):
     response = client.post(
         "/",
         data={"prompt": "   "},
         follow_redirects=False,
     )
 
-    assert response.status_code == 302
+    assert response.status_code == 400
 
 
 def test_index_post_successfully_runs_rag_chain(client):
@@ -120,3 +120,25 @@ def test_nl2br_converts_newlines():
     result = nl2br("line one\nline two")
 
     assert str(result) == "line one<br>\nline two"
+
+
+def test_post_empty_prompt_returns_validation_error():
+    client = app.test_client()
+
+    response = client.post(
+        "/",
+        data={"prompt": "   "},
+    )
+
+    assert response.status_code == 400
+
+
+def test_post_prompt_over_2000_characters_returns_validation_error():
+    client = app.test_client()
+
+    response = client.post(
+        "/",
+        data={"prompt": "a" * 2001},
+    )
+
+    assert response.status_code == 400

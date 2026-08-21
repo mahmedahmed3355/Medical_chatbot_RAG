@@ -3,6 +3,9 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, session, url_for
 from markupsafe import Markup
+from pydantic import ValidationError
+
+from app.schemas.prompt import PromptRequest
 
 load_dotenv()
 
@@ -33,7 +36,17 @@ def index():
         session["messages"] = []
 
     if request.method == "POST":
-        user_input = request.form.get("prompt", "").strip()
+        raw_prompt = request.form.get("prompt", "")
+
+        try:
+            prompt_request = PromptRequest(prompt=raw_prompt)
+            user_input = prompt_request.prompt
+        except ValidationError as exc:
+            return render_template(
+                "index.html",
+                messages=session.get("messages", []),
+                error=exc.errors()[0]["msg"],
+            ), 400
 
         if user_input:
             messages = session["messages"]
