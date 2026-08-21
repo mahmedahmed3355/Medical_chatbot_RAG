@@ -32,3 +32,4 @@ terraform/*.tfvars
 !terraform/terraform.tfvars.example
 
 experiment-results/
+experiments/results/*.json

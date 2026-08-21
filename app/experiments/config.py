@@ -20,21 +20,46 @@ class ExperimentConfig:
     retrieval: RetrievalConfig
     evaluation: EvaluationConfig
 
+    @property
+    def top_k(self) -> int:
+        return self.retrieval.top_k
 
-def load_experiment_config(path: str | Path) -> ExperimentConfig:
-    """Load an experiment configuration from JSON."""
-    config_path = Path(path)
 
-    with config_path.open(encoding="utf-8") as file:
+def load_experiment_config(
+    config_path: str | Path,
+) -> ExperimentConfig:
+    path = Path(config_path)
+
+    with path.open(encoding="utf-8") as file:
         data = json.load(file)
 
+    retrieval_data = data.get("retrieval", {})
+    top_k = int(
+        retrieval_data.get(
+            "top_k",
+            data.get("top_k", 3),
+        )
+    )
+
+    evaluation_data = data.get("evaluation", {})
+    metrics = tuple(
+        str(metric)
+        for metric in evaluation_data.get(
+            "metrics",
+            (
+                "hit_rate",
+                "precision_at_k",
+            ),
+        )
+    )
+
     return ExperimentConfig(
-        experiment_name=data["experiment_name"],
+        experiment_name=str(data["experiment_name"]),
         seed=int(data["seed"]),
         retrieval=RetrievalConfig(
-            top_k=int(data["retrieval"]["top_k"]),
+            top_k=top_k,
         ),
         evaluation=EvaluationConfig(
-            metrics=tuple(data["evaluation"]["metrics"]),
+            metrics=metrics,
         ),
     )

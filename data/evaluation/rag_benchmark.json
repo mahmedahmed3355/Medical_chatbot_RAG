@@ -1,0 +1,32 @@
+{
+  "dataset_name": "medical-rag-evaluation",
+  "version": "1.0",
+  "description": "Deterministic benchmark cases for retrieval evaluation.",
+  "cases": [
+    {
+      "id": "case-001",
+      "query": "What are common symptoms of diabetes?",
+      "relevant_documents": ["doc-diabetes-symptoms"]
+    },
+    {
+      "id": "case-002",
+      "query": "How is hypertension commonly managed?",
+      "relevant_documents": ["doc-hypertension-management"]
+    },
+    {
+      "id": "case-003",
+      "query": "What are possible symptoms of asthma?",
+      "relevant_documents": ["doc-asthma-symptoms"]
+    },
+    {
+      "id": "case-004",
+      "query": "What lifestyle changes can support heart health?",
+      "relevant_documents": ["doc-heart-health"]
+    },
+    {
+      "id": "case-005",
+      "query": "What are common warning signs of dehydration?",
+      "relevant_documents": ["doc-dehydration"]
+    }
+  ]
+}
