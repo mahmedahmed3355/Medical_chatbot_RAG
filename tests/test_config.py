@@ -35,3 +35,26 @@ def test_invalid_chunk_overlap(monkeypatch):
     monkeypatch.delenv("CHUNK_SIZE", raising=False)
     monkeypatch.delenv("CHUNK_OVERLAP", raising=False)
     importlib.reload(config)
+
+
+def test_negative_chunk_overlap(monkeypatch):
+    monkeypatch.setenv("CHUNK_SIZE", "100")
+    monkeypatch.setenv("CHUNK_OVERLAP", "-1")
+
+    import app.config.config as config
+
+    with pytest.raises(
+        ValueError,
+        match="cannot be negative",
+    ):
+        importlib.reload(config)
+
+    monkeypatch.delenv(
+        "CHUNK_SIZE",
+        raising=False,
+    )
+    monkeypatch.delenv(
+        "CHUNK_OVERLAP",
+        raising=False,
+    )
+    importlib.reload(config)
