@@ -198,3 +198,16 @@ Please review CONTRIBUTING.md before opening an issue or pull request.
 ## License
 
 This project is currently provided without an explicit license.
+
+## Maintenance and Quality
+
+The project uses a lightweight quality gate for ongoing maintenance.
+
+Before submitting changes, run:
+
+python -m ruff check app tests
+python -m mypy app
+python -m pytest
+python -m pip check
+
+The project also includes deterministic experiment configuration and a fixed RAG evaluation benchmark for retrieval-quality validation.
