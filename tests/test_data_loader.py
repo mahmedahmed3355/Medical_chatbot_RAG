@@ -26,25 +26,33 @@ def test_process_and_store_pdfs_success(
 
     assert result is vector_store
 
-    mock_create_chunks.assert_called_once_with(
-        documents
-    )
+    mock_create_chunks.assert_called_once_with(documents)
 
-    mock_save_vector_store.assert_called_once_with(
-        chunks
-    )
+    mock_save_vector_store.assert_called_once_with(chunks)
 
 
 @patch("app.components.data_loader.load_pdf_files")
 def test_process_and_store_pdfs_failure(
     mock_load_pdfs,
 ):
-    mock_load_pdfs.side_effect = RuntimeError(
-        "PDF failure"
-    )
+    mock_load_pdfs.side_effect = RuntimeError("PDF failure")
 
     with pytest.raises(
         CustomException,
         match="Failed to process and store PDFs",
     ):
         process_and_store_pdfs()
+
+
+@patch("app.components.data_loader.load_pdf_files")
+def test_process_and_store_pdfs_reraises_custom_exception(
+    mock_load_pdfs,
+):
+    error = CustomException("Known PDF failure")
+
+    mock_load_pdfs.side_effect = error
+
+    with pytest.raises(CustomException) as exc_info:
+        process_and_store_pdfs()
+
+    assert exc_info.value is error
