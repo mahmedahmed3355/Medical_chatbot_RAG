@@ -211,3 +211,25 @@ python -m pytest
 python -m pip check
 
 The project also includes deterministic experiment configuration and a fixed RAG evaluation benchmark for retrieval-quality validation.
+
+## Docker Compose
+
+Run the application with Docker Compose:
+
+docker compose up --build
+
+Run it in the background:
+
+docker compose up --build -d
+
+Check the application health endpoint:
+
+curl -i http://localhost:5000/health
+
+Stop the application:
+
+docker compose down
+
+The application is available at:
+
+http://localhost:5000

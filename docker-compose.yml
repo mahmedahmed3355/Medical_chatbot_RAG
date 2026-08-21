@@ -1,0 +1,21 @@
+services:
+  medical-rag-chatbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: medical-rag-chatbot:local
+    container_name: medical-rag-chatbot-compose
+    ports:
+      - "5000:5000"
+    env_file:
+      - path: .env
+        required: false
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
