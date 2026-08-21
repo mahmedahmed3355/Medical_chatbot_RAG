@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Sequence
 
 from langchain_community.vectorstores import FAISS
+from langchain_core.documents import Document
 
 from app.common.custom_exception import CustomException
 from app.common.logger import get_logger
@@ -43,7 +44,7 @@ def load_vector_store(db_path: Path = DB_FAISS_PATH):
 
 
 def save_vector_store(
-    text_chunks: Sequence,
+    text_chunks: Sequence[Document],
     db_path: Path = DB_FAISS_PATH,
 ):
     try:
@@ -60,7 +61,7 @@ def save_vector_store(
         embedding_model = get_embedding_model()
 
         db = FAISS.from_documents(
-            text_chunks,
+            list(text_chunks),
             embedding_model,
         )
 

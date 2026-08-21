@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional, cast
 
 from langchain_huggingface import HuggingFaceEndpoint
 
@@ -27,7 +27,7 @@ def load_llm(
             huggingface_repo_id,
         )
 
-        llm = HuggingFaceEndpoint(
+        llm = cast(Any, HuggingFaceEndpoint)(
             repo_id=huggingface_repo_id,
             huggingfacehub_api_token=hf_token,
             temperature=0.3,

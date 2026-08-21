@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Sequence, cast
 
 from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -21,7 +21,7 @@ def load_pdf_files(data_path: Path = DATA_PATH):
         loader = DirectoryLoader(
             str(data_path),
             glob="*.pdf",
-            loader_cls=PyPDFLoader,
+            loader_cls=cast(Any, PyPDFLoader),
         )
 
         documents = loader.load()
