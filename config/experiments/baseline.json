@@ -1,0 +1,13 @@
+{
+  "experiment_name": "medical-rag-baseline",
+  "seed": 42,
+  "retrieval": {
+    "top_k": 3
+  },
+  "evaluation": {
+    "metrics": [
+      "hit_rate",
+      "precision_at_k"
+    ]
+  }
+}
