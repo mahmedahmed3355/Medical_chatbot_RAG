@@ -17,9 +17,7 @@ def test_load_benchmark(tmp_path):
         encoding="utf-8",
     )
 
-    benchmark = benchmark_runner.load_benchmark(
-        benchmark_path
-    )
+    benchmark = benchmark_runner.load_benchmark(benchmark_path)
 
     assert benchmark["dataset_name"] == "test"
 
@@ -29,15 +27,11 @@ def test_evaluate_retrieval():
         "cases": [
             {
                 "id": "case-1",
-                "relevant_documents": [
-                    "doc-1"
-                ],
+                "relevant_documents": ["doc-1"],
             },
             {
                 "id": "case-2",
-                "relevant_documents": [
-                    "doc-2"
-                ],
+                "relevant_documents": ["doc-2"],
             },
         ]
     }
@@ -65,10 +59,7 @@ def test_evaluate_retrieval():
 
 
 def test_build_baseline_retrieval_results():
-    results = (
-        benchmark_runner
-        .build_baseline_retrieval_results()
-    )
+    results = benchmark_runner.build_baseline_retrieval_results()
 
     assert isinstance(results, dict)
     assert len(results) == 5
@@ -92,11 +83,7 @@ def test_run_benchmark_writes_results(
 ):
     config_path = tmp_path / "experiment.yaml"
     benchmark_path = tmp_path / "benchmark.json"
-    results_path = (
-        tmp_path
-        / "results"
-        / "benchmark_results.json"
-    )
+    results_path = tmp_path / "results" / "benchmark_results.json"
 
     config_path.write_text(
         "placeholder",
@@ -161,11 +148,7 @@ def test_run_benchmark_writes_results(
         },
     )
 
-    expected_retrieval_results = {
-        "case-test": [
-            "doc-test"
-        ]
-    }
+    expected_retrieval_results = {"case-test": ["doc-test"]}
 
     monkeypatch.setattr(
         benchmark_runner,
@@ -229,10 +212,29 @@ def test_run_benchmark_writes_results(
 
     assert results_path.exists()
 
-    saved_results = json.loads(
-        results_path.read_text(
-            encoding="utf-8"
-        )
-    )
+    saved_results = json.loads(results_path.read_text(encoding="utf-8"))
 
     assert saved_results == result
+
+
+def test_benchmark_runner_module_main_entrypoint(capsys):
+    import runpy
+    import sys
+
+    module_name = "app.experiments.benchmark_runner"
+    sys.modules.pop(module_name, None)
+
+    try:
+        runpy.run_module(
+            module_name,
+            run_name="__main__",
+        )
+    finally:
+        sys.modules.pop(module_name, None)
+
+    output = capsys.readouterr().out
+
+    assert '"benchmark": "medical-rag-evaluation"' in output
+    assert '"benchmark_version": "1.0"' in output
+    assert '"metrics"' in output
+    assert '"mrr": 0.8' in output

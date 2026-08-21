@@ -34,10 +34,29 @@ def test_baseline_result_can_be_saved(tmp_path):
 
     assert output_path.exists()
 
-    saved_result = json.loads(
-        output_path.read_text(
-            encoding="utf-8"
-        )
-    )
+    saved_result = json.loads(output_path.read_text(encoding="utf-8"))
 
     assert saved_result == result
+
+
+def test_baseline_module_main_entrypoint(capsys):
+    import runpy
+    import sys
+
+    module_name = "app.experiments.baseline"
+    sys.modules.pop(module_name, None)
+
+    try:
+        runpy.run_module(
+            module_name,
+            run_name="__main__",
+        )
+    finally:
+        sys.modules.pop(module_name, None)
+
+    output = capsys.readouterr().out
+
+    assert '"experiment_name": "medical-rag-baseline"' in output
+    assert '"seed": 42' in output
+    assert '"top_k": 3' in output
+    assert '"metrics"' in output
