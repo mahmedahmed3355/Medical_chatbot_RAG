@@ -1,10 +1,15 @@
 import os
+import time
+import uuid
 
 from dotenv import load_dotenv
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, Response, g, redirect, render_template, request, session, url_for
 from markupsafe import Markup
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import ValidationError
 
+from app.common.structured_logger import logger
+from app.observability.metrics import REQUEST_COUNT, REQUEST_LATENCY
 from app.schemas.prompt import PromptRequest
 
 load_dotenv()
@@ -23,6 +28,52 @@ def nl2br(value):
 
 
 app.jinja_env.filters["nl2br"] = nl2br
+
+
+@app.before_request
+def start_request_observability():
+    """Create a request identifier and start request timing."""
+    g.request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    g.request_start_time = time.perf_counter()
+
+
+@app.after_request
+def record_request_observability(response):
+    """Record request metrics and attach the request identifier."""
+    endpoint = request.endpoint or "unknown"
+    start_time = getattr(g, "request_start_time", None)
+
+    if start_time is not None:
+        duration = time.perf_counter() - start_time
+
+        REQUEST_LATENCY.labels(
+            method=request.method,
+            endpoint=endpoint,
+        ).observe(duration)
+
+    REQUEST_COUNT.labels(
+        method=request.method,
+        endpoint=endpoint,
+        status=response.status_code,
+    ).inc()
+
+    response.headers["X-Request-ID"] = g.request_id
+
+    logger.info(
+        "http_request_completed",
+        extra={"request_id": g.request_id},
+    )
+
+    return response
+
+
+@app.get("/metrics")
+def metrics():
+    """Expose Prometheus metrics."""
+    return Response(
+        generate_latest(),
+        mimetype=CONTENT_TYPE_LATEST,
+    )
 
 
 @app.get("/health")
