@@ -12,10 +12,10 @@ RUN apt-get update \
         build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
+COPY requirements.lock ./
 
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt \
+    && pip install -r requirements.lock \
     && pip install gunicorn
 
 COPY app ./app
