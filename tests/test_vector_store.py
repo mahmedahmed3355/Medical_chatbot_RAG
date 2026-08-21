@@ -20,9 +20,7 @@ def test_load_vector_store_missing_path(tmp_path):
 
 
 @patch("app.components.vector_store.FAISS")
-@patch(
-    "app.components.vector_store.get_embedding_model"
-)
+@patch("app.components.vector_store.get_embedding_model")
 def test_load_vector_store_success(
     mock_get_embedding_model,
     mock_faiss,
@@ -49,9 +47,7 @@ def test_load_vector_store_success(
 
 
 @patch("app.components.vector_store.FAISS")
-@patch(
-    "app.components.vector_store.get_embedding_model"
-)
+@patch("app.components.vector_store.get_embedding_model")
 def test_save_vector_store_success(
     mock_get_embedding_model,
     mock_faiss,
@@ -73,9 +69,7 @@ def test_save_vector_store_success(
 
     assert result is vector_store
 
-    vector_store.save_local.assert_called_once_with(
-        str(db_path)
-    )
+    vector_store.save_local.assert_called_once_with(str(db_path))
 
 
 def test_save_vector_store_empty_chunks(tmp_path):
@@ -87,3 +81,41 @@ def test_save_vector_store_empty_chunks(tmp_path):
             [],
             tmp_path / "db",
         )
+
+
+@patch("app.components.vector_store.get_embedding_model")
+def test_load_vector_store_reraises_custom_exception(
+    mock_get_embedding_model,
+    tmp_path,
+):
+    db_path = tmp_path / "db"
+    db_path.mkdir()
+
+    error = CustomException("Known embedding failure")
+
+    mock_get_embedding_model.side_effect = error
+
+    with pytest.raises(CustomException) as exc_info:
+        load_vector_store(db_path)
+
+    assert exc_info.value is error
+
+
+@patch("app.components.vector_store.get_embedding_model")
+def test_save_vector_store_reraises_custom_exception(
+    mock_get_embedding_model,
+    tmp_path,
+):
+    error = CustomException("Known embedding failure")
+
+    mock_get_embedding_model.side_effect = error
+
+    chunks = [Mock()]
+
+    with pytest.raises(CustomException) as exc_info:
+        save_vector_store(
+            chunks,
+            tmp_path / "db",
+        )
+
+    assert exc_info.value is error
