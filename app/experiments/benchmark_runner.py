@@ -65,6 +65,63 @@ def build_baseline_retrieval_results() -> dict[str, list[str]]:
     }
 
 
+
+def run_benchmark_with_retriever(
+    retriever_fn,
+) -> dict[str, object]:
+    """
+    Run the benchmark using an injectable retrieval function.
+
+    The retrieval function receives a benchmark case and top_k, and
+    returns the retrieved document identifiers for that case.
+    """
+    config = load_experiment_config(DEFAULT_CONFIG_PATH)
+    set_global_seed(config.seed)
+
+    benchmark = load_benchmark(DEFAULT_BENCHMARK_PATH)
+
+    retrieval_results = {
+        case["id"]: list(
+            retriever_fn(
+                case,
+                config.top_k,
+            )
+        )
+        for case in benchmark["cases"]
+    }
+
+    metrics = evaluate_retrieval(
+        benchmark,
+        retrieval_results,
+        config.top_k,
+    )
+
+    result = {
+        "experiment_name": config.experiment_name,
+        "benchmark": benchmark["dataset_name"],
+        "benchmark_version": benchmark["version"],
+        "seed": config.seed,
+        "top_k": config.top_k,
+        "metrics": metrics,
+    }
+
+    DEFAULT_RESULTS_PATH.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    DEFAULT_RESULTS_PATH.write_text(
+        json.dumps(
+            result,
+            indent=2,
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
+
+    return result
+
+
 def run_benchmark() -> dict[str, object]:
     config = load_experiment_config(
         DEFAULT_CONFIG_PATH
