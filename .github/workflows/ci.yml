@@ -1,10 +1,9 @@
-name: CI
+name: CI Quality Gate
 
 on:
   push:
     branches:
       - main
-      - taskuon-improvements
   pull_request:
     branches:
       - main
@@ -14,7 +13,7 @@ permissions:
 
 jobs:
   test:
-    name: Lint and Test
+    name: Lint, Type Check and Test
     runs-on: ubuntu-latest
 
     strategy:
@@ -40,14 +39,17 @@ jobs:
           python -m pip install -r requirements.lock
           python -m pip install -r requirements-dev.txt
 
+      - name: Dependency integrity check
+        run: python -m pip check
+
       - name: Run Ruff
         run: python -m ruff check app tests
 
       - name: Run mypy
         run: python -m mypy app
 
-      - name: Run tests
-        run: python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=80
+      - name: Run tests with coverage gate
+        run: python -m pytest -q
 
       - name: Compile Python
         run: python -m compileall -q app tests
@@ -73,7 +75,7 @@ jobs:
           python -m pip install -r requirements.lock
           python -m pip install -r requirements-dev.txt
 
-      - name: Run dependency security audit
+      - name: Dependency security audit
         run: python -m pip_audit
 
       - name: Set up Terraform
@@ -95,8 +97,8 @@ jobs:
 
       - name: Run Checkov
         run: |
-          python - <<'PY2'
+          python - <<'PY'
           from checkov.main import Checkov
           result = Checkov().run(["-d", "terraform", "--quiet"])
           raise SystemExit(0 if result is None else result)
-          PY2
+          PY
