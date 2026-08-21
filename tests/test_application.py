@@ -82,7 +82,12 @@ def test_index_post_handles_rag_failure(client):
         )
 
     assert response.status_code == 500
-    assert b"RAG service unavailable" in response.data
+    assert (
+        b"Something went wrong while processing your request."
+        in response.data
+    )
+    assert b"RAG service unavailable" not in response.data
+    assert response.headers.get("X-Request-ID")
 
 
 def test_clear_removes_chat_messages(client):

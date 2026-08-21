@@ -135,12 +135,25 @@ def index():
                 session["messages"] = messages
 
             except Exception as exc:
-                error_msg = f"Error: {exc}"
+                safe_error_msg = (
+                    "Something went wrong while processing your request."
+                )
+
+                request_id = getattr(g, "request_id", None)
+
+                logger.error(
+                    "request_processing_failed",
+                    extra={
+                        "request_id": request_id,
+                        "error_type": type(exc).__name__,
+                    },
+                    exc_info=True,
+                )
 
                 return render_template(
                     "index.html",
                     messages=session["messages"],
-                    error=error_msg,
+                    error=safe_error_msg,
                 ), 500
 
         return redirect(url_for("index"))
