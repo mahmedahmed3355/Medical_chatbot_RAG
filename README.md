@@ -124,6 +124,40 @@ Expected response:
 
 {"status":"ok"}
 
+## Usage
+
+### Quick Start
+
+After installing the project dependencies, start the application from the repository root:
+
+```bash
+python -m app.application
+```
+
+The containerized deployment serves the application on port 5000.
+
+Build the application image:
+
+```bash
+docker build -t medical-chatbot-rag:local .
+```
+
+Run the application container:
+
+```bash
+docker run --rm -p 5000:5000 --name medical-chatbot-rag medical-chatbot-rag:local
+```
+
+Verify that the application is running:
+
+```bash
+curl http://127.0.0.1:5000/health
+```
+
+For the complete operational workflow, including testing, quality checks, Docker operations, troubleshooting, and CI validation, see [RUNBOOK.md](RUNBOOK.md).
+
+For details about the internal project structure and major components, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Testing
 
 Run the complete test suite:
