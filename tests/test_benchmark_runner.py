@@ -1,6 +1,7 @@
 import json
 
 from app.experiments import benchmark_runner
+from app.experiments.schemas import BenchmarkCase, BenchmarkDataset
 
 
 def test_load_benchmark(tmp_path):
@@ -11,30 +12,50 @@ def test_load_benchmark(tmp_path):
             {
                 "dataset_name": "test",
                 "version": "1.0",
-                "cases": [],
+                "cases": [
+                    {
+                        "id": "case-1",
+                        "relevant_documents": [
+                            "doc-1",
+                        ],
+                    },
+                ],
             }
         ),
         encoding="utf-8",
     )
 
-    benchmark = benchmark_runner.load_benchmark(benchmark_path)
+    benchmark = benchmark_runner.load_benchmark(
+        benchmark_path
+    )
 
-    assert benchmark["dataset_name"] == "test"
-
+    assert benchmark.dataset_name == "test"
+    assert benchmark.version == "1.0"
+    assert len(benchmark.cases) == 1
+    assert benchmark.cases[0].id == "case-1"
+    assert benchmark.cases[0].relevant_documents == [
+        "doc-1",
+    ]
 
 def test_evaluate_retrieval():
-    benchmark = {
-        "cases": [
-            {
-                "id": "case-1",
-                "relevant_documents": ["doc-1"],
-            },
-            {
-                "id": "case-2",
-                "relevant_documents": ["doc-2"],
-            },
-        ]
-    }
+    benchmark = BenchmarkDataset(
+        dataset_name="test-benchmark",
+        version="1.0",
+        cases=[
+            BenchmarkCase(
+                id="case-1",
+                relevant_documents=[
+                    "doc-1",
+                ],
+            ),
+            BenchmarkCase(
+                id="case-2",
+                relevant_documents=[
+                    "doc-2",
+                ],
+            ),
+        ],
+    )
 
     retrieval_results = {
         "case-1": [
@@ -141,11 +162,18 @@ def test_run_benchmark_writes_results(
     monkeypatch.setattr(
         benchmark_runner,
         "load_benchmark",
-        lambda path: {
-            "dataset_name": "test-benchmark",
-            "version": "1.0",
-            "cases": [],
-        },
+        lambda path: BenchmarkDataset(
+            dataset_name="test-benchmark",
+            version="1.0",
+            cases=[
+                BenchmarkCase(
+                    id="case-test",
+                    relevant_documents=[
+                        "doc-test",
+                    ],
+                ),
+            ],
+        ),
     )
 
     expected_retrieval_results = {"case-test": ["doc-test"]}
@@ -189,17 +217,25 @@ def test_run_benchmark_writes_results(
 
     assert seed_calls == [42]
 
-    assert evaluation_calls == [
-        (
-            {
-                "dataset_name": "test-benchmark",
-                "version": "1.0",
-                "cases": [],
-            },
-            expected_retrieval_results,
-            3,
-        )
+    assert len(evaluation_calls) == 1
+
+    evaluated_benchmark, evaluated_results, evaluated_top_k = (
+        evaluation_calls[0]
+    )
+
+    assert isinstance(
+        evaluated_benchmark,
+        BenchmarkDataset,
+    )
+    assert evaluated_benchmark.dataset_name == "test-benchmark"
+    assert evaluated_benchmark.version == "1.0"
+    assert len(evaluated_benchmark.cases) == 1
+    assert evaluated_benchmark.cases[0].id == "case-test"
+    assert evaluated_benchmark.cases[0].relevant_documents == [
+        "doc-test",
     ]
+    assert evaluated_results == expected_retrieval_results
+    assert evaluated_top_k == 3
 
     assert result == {
         "experiment_name": "test-experiment",

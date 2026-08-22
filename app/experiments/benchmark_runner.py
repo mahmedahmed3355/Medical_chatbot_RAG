@@ -14,25 +14,11 @@ from app.experiments.reproducibility import (
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-DEFAULT_CONFIG_PATH = (
-    PROJECT_ROOT
-    / "config"
-    / "experiment.yaml"
-)
+DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config" / "experiment.yaml"
 
-DEFAULT_BENCHMARK_PATH = (
-    PROJECT_ROOT
-    / "data"
-    / "evaluation"
-    / "rag_benchmark.json"
-)
+DEFAULT_BENCHMARK_PATH = PROJECT_ROOT / "data" / "evaluation" / "rag_benchmark.json"
 
-DEFAULT_RESULTS_PATH = (
-    PROJECT_ROOT
-    / "experiments"
-    / "results"
-    / "rag_benchmark_baseline.json"
-)
+DEFAULT_RESULTS_PATH = PROJECT_ROOT / "experiments" / "results" / "rag_benchmark_baseline.json"
 
 
 def build_baseline_retrieval_results() -> dict[str, list[str]]:
@@ -65,7 +51,6 @@ def build_baseline_retrieval_results() -> dict[str, list[str]]:
     }
 
 
-
 def run_benchmark_with_retriever(
     retriever_fn,
 ) -> dict[str, object]:
@@ -81,13 +66,13 @@ def run_benchmark_with_retriever(
     benchmark = load_benchmark(DEFAULT_BENCHMARK_PATH)
 
     retrieval_results = {
-        case["id"]: list(
+        case.id: list(
             retriever_fn(
                 case,
                 config.top_k,
             )
         )
-        for case in benchmark["cases"]
+        for case in benchmark.cases
     }
 
     metrics = evaluate_retrieval(
@@ -98,8 +83,8 @@ def run_benchmark_with_retriever(
 
     result = {
         "experiment_name": config.experiment_name,
-        "benchmark": benchmark["dataset_name"],
-        "benchmark_version": benchmark["version"],
+        "benchmark": benchmark.dataset_name,
+        "benchmark_version": benchmark.version,
         "seed": config.seed,
         "top_k": config.top_k,
         "metrics": metrics,
@@ -123,9 +108,7 @@ def run_benchmark_with_retriever(
 
 
 def run_benchmark() -> dict[str, object]:
-    config = load_experiment_config(
-        DEFAULT_CONFIG_PATH
-    )
+    config = load_experiment_config(DEFAULT_CONFIG_PATH)
 
     seed = config.seed
     top_k = config.top_k
@@ -133,9 +116,7 @@ def run_benchmark() -> dict[str, object]:
 
     set_global_seed(seed)
 
-    benchmark = load_benchmark(
-        DEFAULT_BENCHMARK_PATH
-    )
+    benchmark = load_benchmark(DEFAULT_BENCHMARK_PATH)
 
     metrics = evaluate_retrieval(
         benchmark,
@@ -145,8 +126,8 @@ def run_benchmark() -> dict[str, object]:
 
     results: dict[str, object] = {
         "experiment_name": experiment_name,
-        "benchmark": benchmark["dataset_name"],
-        "benchmark_version": benchmark["version"],
+        "benchmark": benchmark.dataset_name,
+        "benchmark_version": benchmark.version,
         "seed": seed,
         "top_k": top_k,
         "metrics": metrics,

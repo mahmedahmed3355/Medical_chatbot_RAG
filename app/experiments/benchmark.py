@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import Any
 
 from app.experiments.evaluation import (
     hit_rate_at_k,
@@ -8,20 +7,23 @@ from app.experiments.evaluation import (
     recall_at_k,
     reciprocal_rank,
 )
+from app.experiments.schemas import BenchmarkDataset
 
 
 def load_benchmark(
     path: Path,
-) -> dict[str, Any]:
+) -> BenchmarkDataset:
     with path.open(
         "r",
         encoding="utf-8",
     ) as file:
-        return json.load(file)
+        data = json.load(file)
+
+    return BenchmarkDataset.model_validate(data)
 
 
 def evaluate_retrieval(
-    benchmark: dict[str, Any],
+    benchmark: BenchmarkDataset,
     retrieval_results: dict[str, list[str]],
     k: int,
 ) -> dict[str, float]:
@@ -29,12 +31,10 @@ def evaluate_retrieval(
     recall_scores: list[float] = []
     reciprocal_ranks: list[float] = []
 
-    for case in benchmark["cases"]:
-        case_id = case["id"]
+    for case in benchmark.cases:
+        case_id = case.id
 
-        relevant_documents = set(
-            case["relevant_documents"]
-        )
+        relevant_documents = set(case.relevant_documents)
 
         retrieved_documents = retrieval_results.get(
             case_id,
@@ -64,21 +64,13 @@ def evaluate_retrieval(
             )
         )
 
-    total_cases = len(benchmark["cases"])
+    total_cases = len(benchmark.cases)
 
     if total_cases == 0:
-        raise ValueError(
-            "Benchmark must contain at least one case"
-        )
+        raise ValueError("Benchmark must contain at least one case")
 
     return {
-        "hit_rate_at_k": (
-            sum(hit_scores) / total_cases
-        ),
-        "recall_at_k": (
-            sum(recall_scores) / total_cases
-        ),
-        "mrr": mean_reciprocal_rank(
-            reciprocal_ranks
-        ),
+        "hit_rate_at_k": (sum(hit_scores) / total_cases),
+        "recall_at_k": (sum(recall_scores) / total_cases),
+        "mrr": mean_reciprocal_rank(reciprocal_ranks),
     }

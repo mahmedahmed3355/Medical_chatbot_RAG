@@ -84,7 +84,7 @@ def test_run_benchmark_with_injected_retriever(
     def fake_retriever(case, top_k):
         retriever_calls.append(
             (
-                case["id"],
+                case.id,
                 top_k,
             )
         )
@@ -100,7 +100,7 @@ def test_run_benchmark_with_injected_retriever(
             ],
         }
 
-        return results[case["id"]]
+        return results[case.id]
 
     result = benchmark_runner.run_benchmark_with_retriever(
         fake_retriever,
