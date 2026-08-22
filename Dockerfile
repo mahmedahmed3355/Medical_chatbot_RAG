@@ -7,11 +7,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-        build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.lock ./
 
 RUN pip install --upgrade pip \
