@@ -42,17 +42,20 @@ jobs:
       - name: Dependency integrity check
         run: python -m pip check
 
-      - name: Run Ruff
-        run: python -m ruff check app tests
+      - name: Run Make build
+        run: make build
 
-      - name: Run mypy
-        run: python -m mypy app
+      - name: Run Make lint
+        run: make lint
 
-      - name: Run tests with coverage gate
-        run: python -m pytest -q -m "not live"
+      - name: Run Make format check
+        run: make format-check
 
-      - name: Compile Python
-        run: python -m compileall -q app tests
+      - name: Run Make type check
+        run: make type-check
+
+      - name: Run Make tests
+        run: make test
 
   security:
     name: Security and IaC

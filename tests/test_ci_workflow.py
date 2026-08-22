@@ -57,25 +57,25 @@ def test_ci_runs_dependency_integrity_check():
 def test_ci_runs_ruff():
     workflow = read_workflow()
 
-    assert "python -m ruff check app tests" in workflow
+    assert "make lint" in workflow
 
 
 def test_ci_runs_mypy():
     workflow = read_workflow()
 
-    assert "python -m mypy app" in workflow
+    assert "make type-check" in workflow
 
 
 def test_ci_runs_pytest():
     workflow = read_workflow()
 
-    assert "python -m pytest -q" in workflow
+    assert "make test" in workflow
 
 
-def test_ci_compiles_python():
+def test_ci_builds_application():
     workflow = read_workflow()
 
-    assert "python -m compileall -q app tests" in workflow
+    assert "make build" in workflow
 
 
 def test_ci_has_security_job():
