@@ -18,9 +18,7 @@ def load_llm(
             raise ValueError("A Hugging Face repository ID is required")
 
         if not hf_token:
-            raise ValueError(
-                "HF_TOKEN is required to initialize the Hugging Face endpoint"
-            )
+            raise ValueError("HF_TOKEN is required to initialize the Hugging Face endpoint")
 
         logger.info(
             "Loading Hugging Face LLM: %s",

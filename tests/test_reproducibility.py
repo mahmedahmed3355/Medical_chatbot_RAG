@@ -22,10 +22,12 @@ def test_global_seed_produces_reproducible_random_values():
     assert first_python == second_python
     assert first_numpy == second_numpy
 
+
 def test_global_seed_sets_python_hash_seed():
     set_global_seed(123)
 
     assert os.environ["PYTHONHASHSEED"] == "123"
+
 
 def test_global_seed_handles_import_error(monkeypatch):
     monkeypatch.setitem(
@@ -38,17 +40,14 @@ def test_global_seed_handles_import_error(monkeypatch):
 
     assert os.environ["PYTHONHASHSEED"] == "7"
 
+
 def test_global_seed_configures_available_torch(monkeypatch):
     calls = []
 
     fake_cuda = types.SimpleNamespace(
         is_available=lambda: True,
-        manual_seed=lambda seed: calls.append(
-            ("cuda_manual_seed", seed)
-        ),
-        manual_seed_all=lambda seed: calls.append(
-            ("cuda_manual_seed_all", seed)
-        ),
+        manual_seed=lambda seed: calls.append(("cuda_manual_seed", seed)),
+        manual_seed_all=lambda seed: calls.append(("cuda_manual_seed_all", seed)),
     )
 
     fake_cudnn = types.SimpleNamespace(
@@ -57,13 +56,9 @@ def test_global_seed_configures_available_torch(monkeypatch):
     )
 
     fake_torch = types.SimpleNamespace(
-        manual_seed=lambda seed: calls.append(
-            ("manual_seed", seed)
-        ),
+        manual_seed=lambda seed: calls.append(("manual_seed", seed)),
         cuda=fake_cuda,
-        backends=types.SimpleNamespace(
-            cudnn=fake_cudnn
-        ),
+        backends=types.SimpleNamespace(cudnn=fake_cudnn),
     )
 
     monkeypatch.setitem(

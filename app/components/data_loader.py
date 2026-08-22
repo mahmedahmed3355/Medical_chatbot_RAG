@@ -23,9 +23,7 @@ def process_and_store_pdfs():
             text_chunks,
         )
 
-        logger.info(
-            "Vector store created successfully"
-        )
+        logger.info("Vector store created successfully")
 
         return vector_store
 
@@ -33,9 +31,7 @@ def process_and_store_pdfs():
         raise
 
     except Exception as exc:
-        logger.exception(
-            "Failed to process and store PDFs"
-        )
+        logger.exception("Failed to process and store PDFs")
         raise CustomException(
             "Failed to process and store PDFs",
             exc,

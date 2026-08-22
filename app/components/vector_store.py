@@ -15,9 +15,7 @@ logger = get_logger(__name__)
 def load_vector_store(db_path: Path = DB_FAISS_PATH):
     try:
         if not db_path.exists():
-            raise FileNotFoundError(
-                f"Vector store does not exist: {db_path}"
-            )
+            raise FileNotFoundError(f"Vector store does not exist: {db_path}")
 
         logger.info(
             "Loading vector store from %s",
@@ -49,9 +47,7 @@ def save_vector_store(
 ):
     try:
         if not text_chunks:
-            raise ValueError(
-                "Cannot create a vector store from empty text chunks"
-            )
+            raise ValueError("Cannot create a vector store from empty text chunks")
 
         logger.info(
             "Creating vector store from %s chunks",

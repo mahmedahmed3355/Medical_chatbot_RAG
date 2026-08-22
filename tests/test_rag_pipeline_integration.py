@@ -45,15 +45,13 @@ def test_offline_rag_pipeline_chunk_embed_save_load_and_retrieve(
     documents = [
         Document(
             page_content=(
-                "Diabetes is a chronic condition that affects how the body "
-                "processes blood glucose."
+                "Diabetes is a chronic condition that affects how the body processes blood glucose."
             ),
             metadata={"source": "medical_a", "topic": "diabetes"},
         ),
         Document(
             page_content=(
-                "Hypertension is a condition in which blood pressure remains "
-                "consistently elevated."
+                "Hypertension is a condition in which blood pressure remains consistently elevated."
             ),
             metadata={"source": "medical_b", "topic": "hypertension"},
         ),
@@ -94,9 +92,6 @@ def test_offline_rag_pipeline_chunk_embed_save_load_and_retrieve(
 
     assert len(results) == 2
 
-    retrieved_topics = {
-        document.metadata["topic"]
-        for document in results
-    }
+    retrieved_topics = {document.metadata["topic"] for document in results}
 
     assert "hypertension" in retrieved_topics

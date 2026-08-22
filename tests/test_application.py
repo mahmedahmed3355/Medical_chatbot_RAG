@@ -35,13 +35,9 @@ def test_index_post_empty_prompt_returns_validation_error(client):
 def test_index_post_successfully_runs_rag_chain(client):
     class FakeQAChain:
         def invoke(self, payload):
-            assert payload == {
-                "query": "What is diabetes?"
-            }
+            assert payload == {"query": "What is diabetes?"}
 
-            return {
-                "result": "Diabetes is a chronic medical condition."
-            }
+            return {"result": "Diabetes is a chronic medical condition."}
 
     with patch(
         "app.application.answer_question",
@@ -82,10 +78,7 @@ def test_index_post_handles_rag_failure(client):
         )
 
     assert response.status_code == 500
-    assert (
-        b"Something went wrong while processing your request."
-        in response.data
-    )
+    assert b"Something went wrong while processing your request." in response.data
     assert b"RAG service unavailable" not in response.data
     assert response.headers.get("X-Request-ID")
 

@@ -19,9 +19,7 @@ def get_embedding_model():
             model_name=EMBEDDING_MODEL_NAME,
         )
 
-        logger.info(
-            "Hugging Face embedding model loaded successfully"
-        )
+        logger.info("Hugging Face embedding model loaded successfully")
 
         return model
 
@@ -29,9 +27,7 @@ def get_embedding_model():
         raise
 
     except Exception as exc:
-        logger.exception(
-            "Failed to load embedding model"
-        )
+        logger.exception("Failed to load embedding model")
 
         raise CustomException(
             "Failed to load embedding model",

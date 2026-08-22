@@ -10,9 +10,7 @@ def test_internal_exception_returns_safe_error_and_request_id():
     )
 
     fake_chain = MagicMock()
-    fake_chain.invoke.side_effect = RuntimeError(
-        "super-secret-internal-error"
-    )
+    fake_chain.invoke.side_effect = RuntimeError("super-secret-internal-error")
 
     with patch(
         "app.components.retriever.create_qa_chain",
@@ -28,10 +26,7 @@ def test_internal_exception_returns_safe_error_and_request_id():
 
     body = response.get_data(as_text=True)
 
-    assert (
-        "Something went wrong while processing your request."
-        in body
-    )
+    assert "Something went wrong while processing your request." in body
 
     assert "super-secret-internal-error" not in body
 

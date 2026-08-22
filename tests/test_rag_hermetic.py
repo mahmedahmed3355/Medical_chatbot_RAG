@@ -12,18 +12,14 @@ class NetworkAccessAttempted(RuntimeError):
 @pytest.fixture
 def block_network(monkeypatch):
     def fail_network(*args, **kwargs):
-        raise NetworkAccessAttempted(
-            "External network access is forbidden in hermetic RAG tests."
-        )
+        raise NetworkAccessAttempted("External network access is forbidden in hermetic RAG tests.")
 
     monkeypatch.setattr(socket, "create_connection", fail_network)
     monkeypatch.setattr(socket, "getaddrinfo", fail_network)
 
 
 def test_embedding_model_creation_is_hermetic(block_network):
-    with patch(
-        "app.components.embeddings.HuggingFaceEmbeddings"
-    ) as embedding_cls:
+    with patch("app.components.embeddings.HuggingFaceEmbeddings") as embedding_cls:
         from app.components.embeddings import get_embedding_model
 
         result = get_embedding_model()
@@ -35,9 +31,7 @@ def test_embedding_model_creation_is_hermetic(block_network):
 def test_llm_creation_is_hermetic_without_real_endpoint(
     block_network,
 ):
-    with patch(
-        "app.components.llm.HuggingFaceEndpoint"
-    ) as endpoint_cls:
+    with patch("app.components.llm.HuggingFaceEndpoint") as endpoint_cls:
         from app.components.llm import load_llm
 
         result = load_llm(
@@ -62,13 +56,16 @@ def test_vector_store_save_is_hermetic(
     fake_embedding_model = MagicMock()
     fake_db = MagicMock()
 
-    with patch(
-        "app.components.vector_store.get_embedding_model",
-        return_value=fake_embedding_model,
-    ) as embedding_factory, patch(
-        "app.components.vector_store.FAISS.from_documents",
-        return_value=fake_db,
-    ) as from_documents:
+    with (
+        patch(
+            "app.components.vector_store.get_embedding_model",
+            return_value=fake_embedding_model,
+        ) as embedding_factory,
+        patch(
+            "app.components.vector_store.FAISS.from_documents",
+            return_value=fake_db,
+        ) as from_documents,
+    ):
         from app.components.vector_store import save_vector_store
 
         documents = [MagicMock()]
@@ -96,13 +93,16 @@ def test_vector_store_load_is_hermetic(
     fake_embedding_model = MagicMock()
     fake_db = MagicMock()
 
-    with patch(
-        "app.components.vector_store.get_embedding_model",
-        return_value=fake_embedding_model,
-    ) as embedding_factory, patch(
-        "app.components.vector_store.FAISS.load_local",
-        return_value=fake_db,
-    ) as load_local:
+    with (
+        patch(
+            "app.components.vector_store.get_embedding_model",
+            return_value=fake_embedding_model,
+        ) as embedding_factory,
+        patch(
+            "app.components.vector_store.FAISS.load_local",
+            return_value=fake_db,
+        ) as load_local,
+    ):
         from app.components.vector_store import load_vector_store
 
         result = load_vector_store(db_path)
@@ -123,15 +123,17 @@ def test_retriever_pipeline_is_hermetic(block_network):
 
     fake_llm = MagicMock()
 
-    with patch(
-        "app.components.retriever.load_vector_store",
-        return_value=fake_vector_store,
-    ) as load_vector_store_mock, patch(
-        "app.components.retriever.load_llm",
-        return_value=fake_llm,
-    ) as load_llm_mock, patch(
-        "app.components.retriever.RetrievalQA.from_chain_type"
-    ) as chain_factory:
+    with (
+        patch(
+            "app.components.retriever.load_vector_store",
+            return_value=fake_vector_store,
+        ) as load_vector_store_mock,
+        patch(
+            "app.components.retriever.load_llm",
+            return_value=fake_llm,
+        ) as load_llm_mock,
+        patch("app.components.retriever.RetrievalQA.from_chain_type") as chain_factory,
+    ):
         from app.components.retriever import create_qa_chain
 
         result = create_qa_chain()

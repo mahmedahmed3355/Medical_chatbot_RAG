@@ -113,7 +113,6 @@ def index():
             try:
                 result = answer_question(user_input)
 
-
                 messages.append(
                     {
                         "role": "assistant",
@@ -124,9 +123,7 @@ def index():
                 session["messages"] = messages
 
             except Exception as exc:
-                safe_error_msg = (
-                    "Something went wrong while processing your request."
-                )
+                safe_error_msg = "Something went wrong while processing your request."
 
                 request_id = getattr(g, "request_id", None)
 

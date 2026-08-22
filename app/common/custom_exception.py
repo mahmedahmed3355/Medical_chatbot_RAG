@@ -28,10 +28,7 @@ class CustomException(Exception):
         line_number = traceback.tb_lineno
 
         return (
-            f"{self.message} | "
-            f"Error: {self.error_detail} | "
-            f"File: {file_name} | "
-            f"Line: {line_number}"
+            f"{self.message} | Error: {self.error_detail} | File: {file_name} | Line: {line_number}"
         )
 
     def __str__(self):

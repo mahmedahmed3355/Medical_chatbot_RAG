@@ -2,9 +2,7 @@ from pathlib import Path
 
 from setuptools import find_packages, setup
 
-requirements = Path("requirements.txt").read_text(
-    encoding="utf-8"
-).splitlines()
+requirements = Path("requirements.txt").read_text(encoding="utf-8").splitlines()
 
 setup(
     name="medical-rag-chatbot",
@@ -14,8 +12,7 @@ setup(
     install_requires=[
         requirement.strip()
         for requirement in requirements
-        if requirement.strip()
-        and not requirement.strip().startswith("#")
+        if requirement.strip() and not requirement.strip().startswith("#")
     ],
     python_requires=">=3.12",
 )

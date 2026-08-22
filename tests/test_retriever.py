@@ -16,15 +16,9 @@ def test_set_custom_prompt():
     assert "question" in prompt.input_variables
 
 
-@patch(
-    "app.components.retriever.RetrievalQA"
-)
-@patch(
-    "app.components.retriever.load_llm"
-)
-@patch(
-    "app.components.retriever.load_vector_store"
-)
+@patch("app.components.retriever.RetrievalQA")
+@patch("app.components.retriever.load_llm")
+@patch("app.components.retriever.load_vector_store")
 def test_create_qa_chain_success(
     mock_load_vector_store,
     mock_load_llm,
@@ -44,16 +38,12 @@ def test_create_qa_chain_success(
 
     assert result is chain
 
-    db.as_retriever.assert_called_once_with(
-        search_kwargs={"k": 1}
-    )
+    db.as_retriever.assert_called_once_with(search_kwargs={"k": 1})
 
     mock_retrieval_qa.from_chain_type.assert_called_once()
 
 
-@patch(
-    "app.components.retriever.load_vector_store"
-)
+@patch("app.components.retriever.load_vector_store")
 def test_create_qa_chain_missing_vector_store(
     mock_load_vector_store,
 ):
@@ -66,12 +56,8 @@ def test_create_qa_chain_missing_vector_store(
         create_qa_chain()
 
 
-@patch(
-    "app.components.retriever.load_llm"
-)
-@patch(
-    "app.components.retriever.load_vector_store"
-)
+@patch("app.components.retriever.load_llm")
+@patch("app.components.retriever.load_vector_store")
 def test_create_qa_chain_missing_llm(
     mock_load_vector_store,
     mock_load_llm,

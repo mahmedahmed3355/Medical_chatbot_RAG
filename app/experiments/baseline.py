@@ -6,10 +6,7 @@ from app.experiments.evaluation import hit_rate, precision_at_k
 from app.experiments.reproducibility import set_global_seed
 
 DEFAULT_CONFIG_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "config"
-    / "experiments"
-    / "baseline.json"
+    Path(__file__).resolve().parents[2] / "config" / "experiments" / "baseline.json"
 )
 
 

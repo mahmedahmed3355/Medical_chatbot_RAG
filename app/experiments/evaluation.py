@@ -15,8 +15,7 @@ def hit_rate(
 
     hits = sum(
         expected_document in retrieved_documents
-        for retrieved_documents, expected_document
-        in zip(predictions[:total], expected[:total])
+        for retrieved_documents, expected_document in zip(predictions[:total], expected[:total])
     )
 
     return hits / total
@@ -37,8 +36,7 @@ def precision_at_k(
 
     correct = sum(
         1
-        for retrieved_documents, expected_document
-        in zip(predictions[:total], expected[:total])
+        for retrieved_documents, expected_document in zip(predictions[:total], expected[:total])
         if expected_document in retrieved_documents[:k]
     )
 
@@ -74,10 +72,7 @@ def recall_at_k(
 
     retrieved_at_k = set(retrieved_documents[:k])
 
-    return (
-        len(relevant_documents & retrieved_at_k)
-        / len(relevant_documents)
-    )
+    return len(relevant_documents & retrieved_at_k) / len(relevant_documents)
 
 
 def reciprocal_rank(

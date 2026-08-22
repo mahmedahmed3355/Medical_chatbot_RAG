@@ -5,17 +5,13 @@ from app.schemas.prompt import PromptRequest
 
 
 def test_valid_prompt_is_accepted():
-    request = PromptRequest(
-        prompt="What are the symptoms of diabetes?"
-    )
+    request = PromptRequest(prompt="What are the symptoms of diabetes?")
 
     assert request.prompt == "What are the symptoms of diabetes?"
 
 
 def test_prompt_whitespace_is_trimmed():
-    request = PromptRequest(
-        prompt="  What is hypertension?  "
-    )
+    request = PromptRequest(prompt="  What is hypertension?  ")
 
     assert request.prompt == "What is hypertension?"
 

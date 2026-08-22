@@ -48,9 +48,7 @@ def test_reciprocal_rank():
 
 
 def test_mean_reciprocal_rank():
-    score = mean_reciprocal_rank(
-        [1.0, 0.5, 0.0]
-    )
+    score = mean_reciprocal_rank([1.0, 0.5, 0.0])
 
     assert score == 0.5
 

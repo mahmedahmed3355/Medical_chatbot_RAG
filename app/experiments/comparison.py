@@ -14,15 +14,11 @@ def compare_experiments(
     if not isinstance(candidate_metrics, Mapping):
         raise ValueError("Candidate metrics must be a mapping")
 
-    common_metrics = (
-        baseline_metrics.keys()
-        & candidate_metrics.keys()
-    )
+    common_metrics = baseline_metrics.keys() & candidate_metrics.keys()
 
     return {
         metric: round(
-            float(candidate_metrics[metric])
-            - float(baseline_metrics[metric]),
+            float(candidate_metrics[metric]) - float(baseline_metrics[metric]),
             10,
         )
         for metric in common_metrics
