@@ -84,21 +84,26 @@ User Question -> Retriever -> Relevant Context
 
 ## Installation
 
-Clone the repository:
+Create and activate a virtual environment:
 
-git clone https://github.com/mahmedahmed3355/Medical_chatbot_RAG.git
-cd Medical_chatbot_RAG
-
-Create a virtual environment:
-
-python3.12 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 
-Install dependencies:
+Upgrade pip:
 
 python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+
+Install the locked runtime dependencies:
+
+python -m pip install -r requirements.lock
+
+Install development dependencies when running tests, linting, or type checks:
+
 python -m pip install -r requirements-dev.txt
+
+Verify the installed dependency set:
+
+python -m pip check
 
 ## Environment Variables
 
