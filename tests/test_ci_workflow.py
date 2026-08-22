@@ -10,6 +10,11 @@ def read_workflow():
     )
 
 
+def test_standard_lockfile_artifacts_exist():
+    assert (PROJECT_ROOT / "pyproject.toml").is_file()
+    assert (PROJECT_ROOT / "uv.lock").is_file()
+
+
 def test_ci_workflow_exists():
     assert WORKFLOW_PATH.is_file()
 
@@ -39,6 +44,13 @@ def test_ci_uses_python_312():
 
     assert "actions/setup-python@v5" in workflow
     assert 'python-version: "3.12"' in workflow
+
+
+def test_ci_validates_uv_lockfile():
+    workflow = read_workflow()
+
+    assert "astral-sh/setup-uv@v7" in workflow
+    assert "uv lock --check" in workflow
 
 
 def test_ci_installs_project_dependencies():

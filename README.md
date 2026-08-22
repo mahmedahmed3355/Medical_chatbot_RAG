@@ -70,7 +70,10 @@ User Question -> Retriever -> Relevant Context
 │       └── ci.yml
 ├── Dockerfile
 ├── Jenkinsfile
+├── pyproject.toml
+├── uv.lock
 ├── requirements.txt
+├── requirements.lock
 ├── requirements-dev.txt
 ├── pytest.ini
 ├── ruff.toml
@@ -104,6 +107,14 @@ python -m pip install -r requirements-dev.txt
 Verify the installed dependency set:
 
 python -m pip check
+
+### Reproducible installs with uv
+
+The repository also provides `pyproject.toml` and `uv.lock` for reproducible dependency resolution.
+
+Install the locked project and development dependencies with:
+
+uv sync --frozen --all-groups
 
 ## Environment Variables
 

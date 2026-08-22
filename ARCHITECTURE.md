@@ -261,3 +261,13 @@ Summary
 The Medical Chatbot RAG architecture separates HTTP delivery, retrieval logic, embeddings, vector storage, language model interaction, observability, experimentation, configuration, and shared infrastructure into dedicated modules.
 
 This structure supports maintainability, testability, containerized deployment, and automated validation through the project's CI workflows.
+
+## Dependency Reproducibility
+
+Python dependencies are defined in `pyproject.toml` and resolved into the committed `uv.lock` file.
+
+`uv.lock` captures the resolved dependency graph used for reproducible installations. The existing requirements files remain available for the current pip-based workflow and compatibility with existing tooling.
+
+Use the following command to install exactly the locked dependency set:
+
+uv sync --frozen --all-groups
