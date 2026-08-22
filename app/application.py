@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from app.common.structured_logger import logger
 from app.observability.metrics import REQUEST_COUNT, REQUEST_LATENCY
 from app.schemas.prompt import PromptRequest
+from app.services.chat_service import answer_question
 
 load_dotenv()
 
@@ -110,20 +111,8 @@ def index():
             session["messages"] = messages
 
             try:
-                from app.components.retriever import create_qa_chain
+                result = answer_question(user_input)
 
-                qa_chain = create_qa_chain()
-
-                response = qa_chain.invoke(
-                    {
-                        "query": user_input,
-                    }
-                )
-
-                result = response.get(
-                    "result",
-                    "No response",
-                )
 
                 messages.append(
                     {

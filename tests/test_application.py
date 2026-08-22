@@ -44,8 +44,8 @@ def test_index_post_successfully_runs_rag_chain(client):
             }
 
     with patch(
-        "app.components.retriever.create_qa_chain",
-        return_value=FakeQAChain(),
+        "app.application.answer_question",
+        return_value="Diabetes is a chronic medical condition.",
     ):
         response = client.post(
             "/",
@@ -73,7 +73,7 @@ def test_index_post_successfully_runs_rag_chain(client):
 
 def test_index_post_handles_rag_failure(client):
     with patch(
-        "app.components.retriever.create_qa_chain",
+        "app.application.answer_question",
         side_effect=RuntimeError("RAG service unavailable"),
     ):
         response = client.post(
