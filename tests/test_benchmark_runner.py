@@ -25,9 +25,7 @@ def test_load_benchmark(tmp_path):
         encoding="utf-8",
     )
 
-    benchmark = benchmark_runner.load_benchmark(
-        benchmark_path
-    )
+    benchmark = benchmark_runner.load_benchmark(benchmark_path)
 
     assert benchmark.dataset_name == "test"
     assert benchmark.version == "1.0"
@@ -36,6 +34,7 @@ def test_load_benchmark(tmp_path):
     assert benchmark.cases[0].relevant_documents == [
         "doc-1",
     ]
+
 
 def test_evaluate_retrieval():
     benchmark = BenchmarkDataset(
@@ -219,9 +218,7 @@ def test_run_benchmark_writes_results(
 
     assert len(evaluation_calls) == 1
 
-    evaluated_benchmark, evaluated_results, evaluated_top_k = (
-        evaluation_calls[0]
-    )
+    evaluated_benchmark, evaluated_results, evaluated_top_k = evaluation_calls[0]
 
     assert isinstance(
         evaluated_benchmark,
