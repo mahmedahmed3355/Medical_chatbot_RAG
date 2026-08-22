@@ -49,7 +49,7 @@ jobs:
         run: python -m mypy app
 
       - name: Run tests with coverage gate
-        run: python -m pytest -q
+        run: python -m pytest -q -m "not live"
 
       - name: Compile Python
         run: python -m compileall -q app tests

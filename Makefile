@@ -28,7 +28,7 @@ install-dev:
 	$(PYTHON) -m pip install -r requirements-dev.txt
 
 test:
-	$(PYTHON) -m pytest
+	$(PYTHON) -m pytest -m "not live"
 
 lint:
 	$(PYTHON) -m ruff check .
