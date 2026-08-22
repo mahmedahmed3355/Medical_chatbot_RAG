@@ -1,4 +1,4 @@
-.PHONY: help install install-dev test lint format-check type-check quality security docker-build docker-run clean
+.PHONY: help install install-runtime install-dev build test lint format-check type-check quality security docker-build docker-run clean
 
 PYTHON ?= python
 IMAGE_NAME ?= medical-chatbot-rag
@@ -8,8 +8,10 @@ PORT ?= 5000
 
 help:
 	@echo "Available targets:"
-	@echo "  install       Install runtime dependencies"
-	@echo "  install-dev   Install runtime and development dependencies"
+	@echo "  install       Install dependencies required for build and test"
+	@echo "  install-runtime Install locked runtime dependencies only"
+	@echo "  install-dev   Alias for install"
+	@echo "  build         Validate application sources for a clean build"
 	@echo "  test          Run the complete test suite"
 	@echo "  lint          Run Ruff checks"
 	@echo "  format-check  Check code formatting with Ruff"
@@ -22,10 +24,15 @@ help:
 
 install:
 	$(PYTHON) -m pip install -r requirements.lock
-
-install-dev:
-	$(PYTHON) -m pip install -r requirements.lock
 	$(PYTHON) -m pip install -r requirements-dev.txt
+
+install-runtime:
+	$(PYTHON) -m pip install -r requirements.lock
+
+install-dev: install
+
+build:
+	$(PYTHON) -m compileall -q app
 
 test:
 	$(PYTHON) -m pytest -m "not live"
