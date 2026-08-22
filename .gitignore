@@ -38,3 +38,6 @@ experiments/results/*.json
 .tools/
 terraform.tfstate
 terraform.tfstate.*
+
+# Mypy cache
+.mypy_cache/
