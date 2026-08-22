@@ -53,6 +53,17 @@ def test_ci_validates_uv_lockfile():
     assert "uv lock --check" in workflow
 
 
+def test_ci_test_path_reaches_pytest_coverage_gate():
+    makefile = (PROJECT_ROOT / "Makefile").read_text(encoding="utf-8")
+    pytest_config = (PROJECT_ROOT / "pytest.ini").read_text(encoding="utf-8")
+    workflow = read_workflow()
+
+    assert "run: make test" in workflow
+    assert '$(PYTHON) -m pytest -m "not live"' in makefile
+    assert "--cov=app" in pytest_config
+    assert "--cov-fail-under=95" in pytest_config
+
+
 def test_ci_installs_project_dependencies():
     workflow = read_workflow()
 
